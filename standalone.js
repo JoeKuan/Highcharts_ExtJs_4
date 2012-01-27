@@ -1,6 +1,6 @@
 Ext.Loader.setConfig({
   enabled : true,
-  disableCaching : false, // For debug only
+  disableCaching : true, // For debug only
   paths : {
     'Chart' : 'Chart'
   }
