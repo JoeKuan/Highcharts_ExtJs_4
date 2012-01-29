@@ -39,7 +39,7 @@ Ext.application({
       autoLoad : true
     });
 
-    var win = Ext.create('Ext.Window', {
+    var win = Ext.create('Ext.window.Window', {
       width : 800,
       height : 600,
       minHeight : 400,
@@ -70,8 +70,6 @@ Ext.application({
           name : 'Today',
           visible : true
         }],
-        height : 500,
-        width : 700,
         store : store,
         xField : 'time',
         chartConfig : {

@@ -271,7 +271,8 @@ Ext.define("Chart.ux.HighChart", {
 
     if(bind) {
       w.on('move', this.onMove, this);
-
+      w.on('resize', this.onResize, this);
+      
       if(this.ownerCt)
         this.ownerCt.on('render', this.update, this);
     } else {
@@ -435,8 +436,10 @@ Ext.define("Chart.ux.HighChart", {
     }
 
   },
+  
   //private
   onResize : function() {
+    console.log("Call onResize");
     Chart.ux.HighChart.superclass.onResize.call(this);
     this.update();
   },
