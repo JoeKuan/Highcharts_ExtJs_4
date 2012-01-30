@@ -439,7 +439,6 @@ Ext.define("Chart.ux.HighChart", {
   
   //private
   onResize : function() {
-    console.log("Call onResize");
     Chart.ux.HighChart.superclass.onResize.call(this);
     this.update();
   },

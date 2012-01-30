@@ -20,7 +20,6 @@ Ext.application({
   name : 'HighCharts',
   appFolder : 'app',
   controllers : ['Charts'],
-  models : ['Chart'],
 
   launch : function() {
 
