@@ -60,7 +60,7 @@ Ext.define("Chart.ux.HighChart", {
     if(this.store) {
       this.store = Ext.data.StoreManager.lookup(this.store);
     }
-    this.callParent(arguments)
+    this.callParent(arguments);
   },
   /**
    * Add one or more series to the chart
@@ -75,7 +75,7 @@ Ext.define("Chart.ux.HighChart", {
       var serie = series[i];
       if(!serie.serieCls) {
         if(serie.type != null || this.defaultSerieType != null) {
-          cls = Chart.ux.HighChart.Series.get(serie.type != null ? serie.type : this.defaultSerieType)
+          cls = Chart.ux.HighChart.Series.get(serie.type != null ? serie.type : this.defaultSerieType);
         } else {
           cls = Chart.ux.HighChart.Serie;
         }
@@ -144,7 +144,7 @@ Ext.define("Chart.ux.HighChart", {
     else
       this.chartConfig.title = {
         text : title
-      }
+      };
     if(this.chart && this.chart.container)
       this.draw();
   },
@@ -158,7 +158,7 @@ Ext.define("Chart.ux.HighChart", {
     else
       this.chartConfig.subtitle = {
         text : title
-      }
+      };
     if(this.chart && this.chart.container)
       this.draw();
   },
@@ -247,7 +247,7 @@ Ext.define("Chart.ux.HighChart", {
 
     if(this.xField && this.store) {
       for(var i = 0; i < items.length; i++) {
-        data.push(items[i].data[this.xField])
+        data.push(items[i].data[this.xField]);
       }
       if(this.chart)
         this.chart.xAxis[0].setCategories(data, true);
@@ -263,10 +263,10 @@ Ext.define("Chart.ux.HighChart", {
      */
     var getWindow = function(parent) {
       if(parent.ownerCt)
-        return getWindow(parent.ownerCt)
+        return getWindow(parent.ownerCt);
       else
         return parent;
-    }
+    };
     var w = getWindow(this);
 
     if(bind) {
@@ -278,7 +278,7 @@ Ext.define("Chart.ux.HighChart", {
     } else {
       if(this.ownerCt)
         this.ownerCt.un('render', this.update, this);
-      w.un('move', this.onMove, this)
+      w.un('move', this.onMove, this);
     }
   },
   /**
@@ -356,7 +356,7 @@ Ext.define("Chart.ux.HighChart", {
       // Update the series
       for( i = 0; i < seriesCount; i++) {
         if(this.series[i].useTotals) {
-          this.chart.series[i].setData(this.series[i].getTotals())
+          this.chart.series[i].setData(this.series[i].getTotals());
         } else if(data[i].length > 0)
           this.chart.series[i].setData(data[i], (i == (seriesCount - 1)));
         // true == redraw.
@@ -448,14 +448,14 @@ Ext.define("Chart.ux.HighChart", {
       var s = this.series[i];
       if(s.type == 'pie' && s.useTotals) {
         s.removeData(record, index);
-        this.chart.series[i].setData(s.getTotals())
+        this.chart.series[i].setData(s.getTotals());
       } else {
-        this.chart.series[i].data[index].remove(true)
+        this.chart.series[i].data[index].remove(true);
       }
     }
     Ext.each(this.chart.series, function(serie) {
       serie.data[index].remove(true);
-    })
+    });
     if(this.xField) {
       this.updatexAxisData();
     }
@@ -494,7 +494,7 @@ Chart.ux.HighChart.Series = function() {
     get : function(id) {
       return items[values.indexOf(id)];
     }
-  }
+  };
 }();
 
 /**

@@ -16,6 +16,7 @@ Ext.define('HighCharts.controller.Charts', {
             mainChart.store.load();
           }
         }
+
       },
 
       // Click on entry in the left tree
@@ -40,36 +41,27 @@ Ext.define('HighCharts.controller.Charts', {
           // Create the store if not exists
           var configs = Ext.create('Chart.ux.SampleConfigs');
           var hcConfg = null;
-
+          if(store) {
+            store.destroy();
+          }
           switch (selectedType) {
             case 'spline':
               hcConfig = configs.getSpline();
-              if(!store) {
-                store = Ext.create('HighCharts.store.Temperature');
-              } else if(prevSelected == 'pie') {
-                store.destroy();
-                store = Ext.create('HighCharts.store.Temperature');
-              }
+              store = Ext.create('HighCharts.store.Temperature');
               store.getProxy().setModel('HighCharts.model.Temperature');
               break;
             case 'column':
               hcConfig = configs.getColumn();
-              if(!store) {
-                store = Ext.create('HighCharts.store.Temperature');
-              } else if(prevSelected == 'pie') {
-                store.destroy();
-                store = Ext.create('HighCharts.store.Temperature');
-              }
+              store = Ext.create('HighCharts.store.Temperature');
               store.getProxy().setModel('HighCharts.model.Temperature');
               break;
             case 'pie':
               hcConfig = configs.getPie();
-              if(!store) {
-                store = Ext.create('HighCharts.store.TempSummary');
-              } else if(prevSelected != 'pie') {
-                store.destroy();
-                store = Ext.create('HighCharts.store.TempSummary');
-              }
+              store = Ext.create('HighCharts.store.TempSummary');
+              break;
+            case 'scatter':
+              hcConfig = configs.getScatter();
+              store = Ext.create('HighCharts.store.Scatter');
               break;
           }
 
@@ -83,8 +75,9 @@ Ext.define('HighCharts.controller.Charts', {
           // Enable all the chart relate buttons
           Ext.getCmp('reload').setDisabled(false);
         }
-      }
-    })
 
+      }
+    });
   }
+
 });
