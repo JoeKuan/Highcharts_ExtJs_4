@@ -30,7 +30,7 @@ Ext.application({
       model : 'HighChartData',
       proxy : {
         type : 'ajax',
-        url : './data/temp_example.php',
+        url : './data/standalone.json',
         reader : {
           type : 'json',
           root : 'rows'
@@ -50,12 +50,6 @@ Ext.application({
       title : 'Highchart example',
       renderTo : Ext.getBody(),
       layout : 'fit',
-      tbar : [{
-        text : 'Reload Data',
-        handler : function() {
-          store.load();
-        }
-      }],
       items : [{
         xtype : 'highchart',
         id : 'chart',
