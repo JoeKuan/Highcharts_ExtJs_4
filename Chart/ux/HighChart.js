@@ -1,24 +1,19 @@
-if (!Array.prototype.indexOf)
-{
-  Array.prototype.indexOf = function(elt /*, from*/)
-  {
+if(!Array.prototype.indexOf) {
+  Array.prototype.indexOf = function(elt /*, from*/) {
     var len = this.length;
 
     var from = Number(arguments[1]) || 0;
-    from = (from < 0)
-         ? Math.ceil(from)
-         : Math.floor(from);
-    if (from < 0)
+    from = (from < 0) ? Math.ceil(from) : Math.floor(from);
+    if(from < 0)
       from += len;
 
-    for (; from < len; from++)
-    {
-      if (from in this &&
-          this[from] === elt)
+    for(; from < len; from++) {
+      if( from in this && this[from] === elt)
         return from;
     }
     return -1;
   };
+
 }
 
 Ext.define("Chart.ux.HighChart", {
@@ -27,8 +22,10 @@ Ext.define("Chart.ux.HighChart", {
 
   /**
    * @cfg {Object} defaultSerieType
-   * Sets styles for this chart. This contains default styling, so modifying this property will <b>override</b>
-   * the built in styles of the chart. Use {@link #extraStyle} to add customizations to the default styling.
+   * Sets styles for this chart. This contains default styling, so modifying this
+   * property will <b>override</b>
+   * the built in styles of the chart. Use {@link #extraStyle} to add
+   * customizations to the default styling.
    */
   defaultSerieType : null,
 
@@ -45,7 +42,8 @@ Ext.define("Chart.ux.HighChart", {
   updateDelay : 0,
 
   /**
-   * @cfg {Object} loadMask An {@link Ext.LoadMask} config or true to mask the chart while
+   * @cfg {Object} loadMask An {@link Ext.LoadMask} config or true to mask the
+   * chart while
    * loading. Defaults to false.
    */
   loadMask : false,
@@ -62,13 +60,14 @@ Ext.define("Chart.ux.HighChart", {
     }
     this.callParent(arguments);
   },
+
   /**
    * Add one or more series to the chart
    * @param {Array} series An array of series
    * @param {Boolean} append the serie. Defaults to true
    */
   addSeries : function(series, append) {
-    append = (append == null) ? true : false;
+    append = (append === null || append === true) ? true : false;
     var n = new Array(), c = new Array(), cls, serieObject;
     // Add empty data to the serie or just leave it normal. Bug in HighCharts?
     for(var i = 0; i < series.length; i++) {
@@ -100,7 +99,7 @@ Ext.define("Chart.ux.HighChart", {
       for(var i = 0; i < c.length; i++) {
         this.chart.addSeries(c[i], true);
       }
-      this.refresh();
+      //this.refresh();
 
       // Set the data in the config.
     } else {
@@ -114,6 +113,7 @@ Ext.define("Chart.ux.HighChart", {
       }
     }
   },
+
   /**
    *
    */
@@ -125,6 +125,7 @@ Ext.define("Chart.ux.HighChart", {
     }
     this.series.splice(id, 1);
   },
+
   /**
    * Remove all series
    */
@@ -134,6 +135,7 @@ Ext.define("Chart.ux.HighChart", {
       this.removeSerie(0);
     }
   },
+
   /**
    * Set the title of the chart
    * @param {String} title Text to set the subtitle
@@ -148,6 +150,7 @@ Ext.define("Chart.ux.HighChart", {
     if(this.chart && this.chart.container)
       this.draw();
   },
+
   /**
    * Set the subtitle of the chart
    * @param {String} title Text to set the subtitle
@@ -162,6 +165,7 @@ Ext.define("Chart.ux.HighChart", {
     if(this.chart && this.chart.container)
       this.draw();
   },
+
   initEvents : function() {
     if(this.loadMask) {
       this.loadMask = new Ext.LoadMask(this.el, Ext.apply({
@@ -169,6 +173,7 @@ Ext.define("Chart.ux.HighChart", {
       }, this.loadMask));
     }
   },
+
   afterRender : function() {
 
     if(this.store)
@@ -199,9 +204,11 @@ Ext.define("Chart.ux.HighChart", {
     // Make a delayed call to update the chart.
     this.update(500);
   },
+
   onMove : function() {
 
   },
+
   draw : function() {
     /**
      * Redraw the chart
@@ -237,10 +244,12 @@ Ext.define("Chart.ux.HighChart", {
     // Refresh the data
     this.refresh();
   },
+
   //@deprecated
   onContainerResize : function() {
     this.draw();
   },
+
   //private
   updatexAxisData : function() {
     var data = [], items = this.store.data.items;
@@ -255,6 +264,7 @@ Ext.define("Chart.ux.HighChart", {
         this.chartConfig.xAxis[0].categories = data;
     }
   },
+
   bindComponent : function(bind) {
     /**
      * Make the chart update the positions
@@ -267,12 +277,13 @@ Ext.define("Chart.ux.HighChart", {
       else
         return parent;
     };
+
     var w = getWindow(this);
 
     if(bind) {
       w.on('move', this.onMove, this);
       w.on('resize', this.onResize, this);
-      
+
       if(this.ownerCt)
         this.ownerCt.on('render', this.update, this);
     } else {
@@ -281,6 +292,7 @@ Ext.define("Chart.ux.HighChart", {
       w.un('move', this.onMove, this);
     }
   },
+
   /**
    * Changes the data store bound to this chart and refreshes it.
    * @param {Store} store The store to bind to this chart
@@ -318,6 +330,7 @@ Ext.define("Chart.ux.HighChart", {
       this.refresh();
     }
   },
+
   /**
    * Complete refresh of the chart
    */
@@ -347,8 +360,12 @@ Ext.define("Chart.ux.HighChart", {
               serie.clear();
             point = serie.getData(record, x);
           } else {
-            point = serie.getData(record, x);
-            data[i].push(point);
+            if(serie.data && serie.data[x]) {
+              data[i].push(serie.data[x]);
+            } else {
+              point = serie.getData(record, x);
+              data[i].push(point);
+            }
           }
         }
       }
@@ -357,9 +374,10 @@ Ext.define("Chart.ux.HighChart", {
       for( i = 0; i < seriesCount; i++) {
         if(this.series[i].useTotals) {
           this.chart.series[i].setData(this.series[i].getTotals());
-        } else if(data[i].length > 0)
+        } else if(data[i].length > 0) {
           this.chart.series[i].setData(data[i], (i == (seriesCount - 1)));
-        // true == redraw.
+          // true == redraw.
+        }
       }
 
       if(this.xField) {
@@ -367,6 +385,7 @@ Ext.define("Chart.ux.HighChart", {
       }
     }
   },
+
   /**
    * Update a selected row.
    */
@@ -388,6 +407,7 @@ Ext.define("Chart.ux.HighChart", {
       }
     }
   },
+
   /**
    * A function to delay the updates
    * @param {Integer} delay Set a custom delay
@@ -399,18 +419,22 @@ Ext.define("Chart.ux.HighChart", {
     }
     this.updateTask.delay(cdelay);
   },
+
   // private
   onDataChange : function() {
     this.refresh();
   },
+
   // private
   onClear : function() {
     this.refresh();
   },
+
   // private
   onUpdate : function(ds, record) {
     this.refreshRow(record);
   },
+
   // private
   onAdd : function(ds, records, index) {
     var redraw = false, xFieldData = [];
@@ -436,12 +460,13 @@ Ext.define("Chart.ux.HighChart", {
     }
 
   },
-  
+
   //private
   onResize : function() {
     Chart.ux.HighChart.superclass.onResize.call(this);
     this.update();
   },
+
   // private
   onRemove : function(ds, record, index, isUpdate) {
     for(var i = 0; i < this.series.length; i++) {
@@ -456,14 +481,17 @@ Ext.define("Chart.ux.HighChart", {
     Ext.each(this.chart.series, function(serie) {
       serie.data[index].remove(true);
     });
+
     if(this.xField) {
       this.updatexAxisData();
     }
   },
+
   // private
   onLoad : function() {
     this.refresh();
   },
+
   destroy : function() {
     delete this.series;
     if(this.chart) {
@@ -476,6 +504,7 @@ Ext.define("Chart.ux.HighChart", {
 
     Chart.ux.HighChart.superclass.destroy.call(this);
   }
+
 });
 
 /**
@@ -491,9 +520,11 @@ Chart.ux.HighChart.Series = function() {
       items.push(cls);
       values.push(id);
     },
+
     get : function(id) {
       return items[values.indexOf(id)];
     }
+
   };
 }();
 
@@ -507,7 +538,8 @@ Ext.define('Chart.ux.HighChart.Serie', {
   type : null,
 
   /**
-   * The field used to access the x-axis value from the items from the data source.
+   * The field used to access the x-axis value from the items from the data
+   * source.
    *
    * @property xField
    * @type String
@@ -515,7 +547,8 @@ Ext.define('Chart.ux.HighChart.Serie', {
   xField : null,
 
   /**
-   * The field used to access the y-axis value from the items from the data source.
+   * The field used to access the y-axis value from the items from the data
+   * source.
    *
    * @property yField
    * @type String
@@ -541,6 +574,7 @@ Ext.define('Chart.ux.HighChart.Serie', {
       point.x = record.data[xField];
     return point;
   },
+
   serieCls : true,
 
   constructor : function(config) {
@@ -551,6 +585,7 @@ Ext.define('Chart.ux.HighChart.Serie', {
     Ext.apply(this, config);
     this.config = config;
   }
+
 });
 
 /**
@@ -678,6 +713,7 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
       }
     }
   },
+
   //private
   addData : function(record) {
     for(var i = 0; i < this.columns.length; i++) {
@@ -685,6 +721,7 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
       this.columnData[c] = this.columnData[c] + record.data[c];
     }
   },
+
   //private
   update : function(record) {
     for(var i = 0; i < this.columns.length; i++) {
@@ -693,6 +730,7 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
         this.columnData[c] = this.columnData[c] + record.data[c] - record.modified[c];
     }
   },
+
   //private
   removeData : function(record, index) {
     for(var i = 0; i < this.columns.length; i++) {
@@ -700,6 +738,7 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
       this.columnData[c] = this.columnData[c] - record.data[c];
     }
   },
+
   //private
   clear : function() {
     for(var i = 0; i < this.columns.length; i++) {
@@ -707,6 +746,7 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
       this.columnData[c] = 0;
     }
   },
+
   //private
   getData : function(record, index) {
     if(this.useTotals) {
@@ -715,6 +755,7 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
     }
     return [record.data[this.categorieField], record.data[this.dataField]];
   },
+
   getTotals : function() {
     var a = new Array();
     for(var i = 0; i < this.columns.length; i++) {
@@ -723,5 +764,6 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
     }
     return a;
   }
+
 });
 Chart.ux.HighChart.Series.reg('pie', Chart.ux.HighChart.PieSerie);
