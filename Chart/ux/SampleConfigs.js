@@ -277,7 +277,75 @@ Ext.define ("Chart.ux.SampleConfigs", {
           }
         }
       }
+    },
+
+    donut : {
+      series : [{
+        type : 'pie',
+        categorieField : 'vendor',
+        dataField: 'usage',
+        name: 'Browsers',
+        size: '60%',
+        totalDataField: true,
+        dataLabels: {
+          formatter: function() {
+            return this.y > 5 ? this.point.name : null;
+          },
+          color: 'white',
+          distance: -30
+        }
+        }, {
+        type : 'pie',
+        categorieField : 'version',
+        dataField: 'usage',
+        name: 'Versions',
+        innerSize: '60%',
+        dataLabels: {
+          formatter: function() {
+            return this.y > 1 ? '<b>'+ this.point.name +':</b> '+ this.y +'%'  : null;
+          }
+        }
+      }],
+      height : 500,
+      width : 700,
+      chartConfig : {
+        chart : {
+          marginRight : 130,
+          marginBottom : 120,
+        },
+        title : {
+          text : 'HighChart Donut Pie for ExtJs 4',
+          x : -20 //center
+        },
+        subtitle : {
+          text : 'Browser market share, April, 2011',
+          x : -20
+        },
+        tooltip : {
+          formatter : function () {
+				    return '<b>'+ this.point.name +'</b>: '+ this.y +' %';
+          }
+        },
+        legend : {
+          layout : 'vertical',
+          align : 'right',
+          verticalAlign : 'top',
+          x : -10,
+          y : 100,
+          borderWidth : 0
+        },
+        credits : {
+          text : 'joekuan.wordpress.com',
+          href : 'http://joekuan.wordpress.com',
+          style : {
+            cursor : 'pointer',
+            color : '#707070',
+            fontSize : '12px'
+          }
+        }
+      }
     }
+
   },
 
   constructor : function (cfg) {

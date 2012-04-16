@@ -63,6 +63,11 @@ Ext.define('HighCharts.controller.Charts', {
               hcConfig = configs.getScatter();
               store = Ext.create('HighCharts.store.Scatter');
               break;
+            case 'donut (pie)':
+            case 'donut':
+              hcConfig = configs.getDonut();
+              store = Ext.create('HighCharts.store.Browsers');
+              break;
           }
 
           // New chart with config and id

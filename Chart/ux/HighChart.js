@@ -355,10 +355,13 @@ Ext.define("Chart.ux.HighChart", {
         }
         for( i = 0; i < seriesCount; i++) {
           var serie = this.series[i], point;
-          if((serie.type == 'pie' && serie.useTotals)) {
+          if(serie.type == 'pie' && serie.useTotals) {
             if(x == 0)
               serie.clear();
             point = serie.getData(record, x);
+          }
+          if(serie.type == 'pie' && serie.totalDataField) {
+            serie.getData(record, data[i]);
           } else {
             if(serie.data && serie.data[x]) {
               data[i].push(serie.data[x]);
@@ -689,6 +692,11 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
   categorieField : null,
 
   /**
+   * totalDataField
+   */
+  totalDataField : false,
+
+  /**
    * Datafield
    */
   dataField : null,
@@ -748,7 +756,25 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
   },
 
   //private
-  getData : function(record, index) {
+  getData : function(record, seriesData) {
+
+    // Summed up the category among the series data
+    if(this.totalDataField) {
+      var found = null;
+      for(var i = 0; i < seriesData.length; i++) {
+        if(seriesData[i][0] == record.data[this.categorieField]) {
+          found = i;
+          seriesData[i][1] += record.data[this.dataField];
+          break;
+        }
+      }
+      if(found === null) {
+        seriesData.push([record.data[this.categorieField], record.data[this.dataField]]);
+        i = seriesData.length - 1;
+      }
+      return seriesData[i];
+    }
+
     if(this.useTotals) {
       this.addData(record);
       return [];
