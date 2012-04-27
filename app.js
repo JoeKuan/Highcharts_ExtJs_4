@@ -50,7 +50,7 @@ Ext.application({
           id : 'reload',
           disabled : true,
           action: 'reload'
-        }],
+        }]
       }]
     });
 

@@ -51,7 +51,7 @@ Ext.define("Chart.ux.HighChart", {
   // Create getter and setter function
   config : {
     title : '',
-    subTitle : '',
+    subTitle : ''
   },
 
   initComponent : function() {

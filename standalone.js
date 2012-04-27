@@ -117,7 +117,7 @@ Ext.application({
               animation : {
                 duration : 3000,
                 easing : 'swing'
-              },
+              }
             }
           },
           tooltip : {

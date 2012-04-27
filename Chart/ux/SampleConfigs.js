@@ -5,11 +5,11 @@ Ext.define ("Chart.ux.SampleConfigs", {
       series : [{
         type : 'spline',
         dataIndex : 'yesterday',
-        name : 'Yesterday',
+        name : 'Yesterday'
       }, {
         type : 'spline',
         dataIndex : 'today',
-        name : 'Today',
+        name : 'Today'
       }],
       height : 500,
       width : 700,
@@ -31,7 +31,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
         xAxis : [{
           title : {
             text : 'Time',
-            margin : 20,
+            margin : 20
           },
           labels : {
             rotation : 270,
@@ -87,11 +87,11 @@ Ext.define ("Chart.ux.SampleConfigs", {
       series : [{
         type : 'column',
         dataIndex : 'yesterday',
-        name : 'Yesterday',
+        name : 'Yesterday'
       }, {
         type : 'column',
         dataIndex : 'today',
-        name : 'Today',
+        name : 'Today'
       }],
       height : 500,
       width : 700,
@@ -113,7 +113,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
         xAxis : [{
           title : {
             text : 'Time',
-            margin : 20,
+            margin : 20
           },
           labels : {
             rotation : 270,
@@ -177,7 +177,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
       chartConfig : {
         chart : {
           marginRight : 130,
-          marginBottom : 120,
+          marginBottom : 120
         },
         title : {
           text : 'HighChart Example For ExtJs 4',
@@ -242,7 +242,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
         xAxis : [{
           title : {
             text : 'Time',
-            margin : 20,
+            margin : 20
           },
           labels : {
             rotation : 270,
@@ -311,7 +311,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
       chartConfig : {
         chart : {
           marginRight : 130,
-          marginBottom : 120,
+          marginBottom : 120
         },
         title : {
           text : 'HighChart Donut Pie for ExtJs 4',
