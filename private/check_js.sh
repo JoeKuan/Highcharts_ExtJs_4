@@ -16,3 +16,15 @@ do
   echo
 done
 
+cat <<'.' > Chart/ux/HighChart.compiled.js 
+/**
+ * @author Joe Kuan (improved & ported from ExtJs 3 highchart adapter)
+ * @email kuan.joe@gmail.com
+ * @version 1.0
+ * @date 8 May 2012
+ *
+ * You are not permitted to remove the author section from this file.
+ */
+
+.
+java -jar $closure --js Chart/ux/HighChart.js >> Chart/ux/HighChart.compiled.js
