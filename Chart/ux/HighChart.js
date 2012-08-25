@@ -1,7 +1,7 @@
 /**
  * @author Joe Kuan (improved & ported from ExtJs 3 highchart adapter)
  * @email kuan.joe@gmail.com
- * @version 1.0
+ * @version 1.1
  * @date 8 May 2012
  *
  * You are not permitted to remove the author section from this file.
@@ -188,11 +188,13 @@ Ext.define("Chart.ux.HighChart", {
     if(this.store)
       this.bindStore(this.store, true);
 
-    Chart.ux.HighChart.superclass.afterRender.call(this);
+    this.callParent(arguments);
 
     this.bindComponent(true);
 
-    Ext.applyIf(this.chartConfig.chart, {
+    // Ext.applyIf causes problem in 4.1.x but works fine with
+    // 4.0.x
+    Ext.apply(this.chartConfig.chart, {
       renderTo : this.el.dom
     });
 
@@ -475,7 +477,7 @@ Ext.define("Chart.ux.HighChart", {
 
   //private
   onResize : function() {
-    Chart.ux.HighChart.superclass.onResize.call(this);
+    this.callParent(arguments);
     this.update();
   },
 
@@ -514,7 +516,7 @@ Ext.define("Chart.ux.HighChart", {
     this.bindStore(null);
     this.bindComponent(null);
 
-    Chart.ux.HighChart.superclass.destroy.call(this);
+    this.callParent(arguments);
   }
 
 });
@@ -721,7 +723,7 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
   columns : [],
 
   constructor : function(config) {
-    Chart.ux.HighChart.PieSerie.superclass.constructor.apply(this, arguments);
+    this.callParent(arguments);
     if(this.useTotals) {
       this.columnData = {};
       var length = this.columns.length;

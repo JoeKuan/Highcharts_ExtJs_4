@@ -84,6 +84,9 @@ Ext.application({
             text : 'Random value',
             x : -20
           },
+          scrollbar: {
+            enabled: true
+          },
           xAxis : [{
             title : {
               text : 'Time',

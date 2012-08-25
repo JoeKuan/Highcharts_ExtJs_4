@@ -21,7 +21,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
           zoomType : 'x'
         },
         title : {
-          text : 'HighChart Example For ExtJs 4',
+          text : 'Highcharts (' + Highcharts.version + ') Example For ExtJs ' + Ext.versions.core.version,
           x : -20 //center
         },
         subtitle : {
@@ -103,7 +103,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
           zoomType : 'x'
         },
         title : {
-          text : 'HighChart Example For ExtJs 4',
+          text : 'Highcharts (' + Highcharts.version + ') Example For ExtJs ' + Ext.versions.core.version,
           x : -20 //center
         },
         subtitle : {
@@ -180,7 +180,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
           marginBottom : 120
         },
         title : {
-          text : 'HighChart Example For ExtJs 4',
+          text : 'Highcharts (' + Highcharts.version + ') Example For ExtJs ' + Ext.versions.core.version,
           x : -20 //center
         },
         subtitle : {
@@ -191,7 +191,6 @@ Ext.define ("Chart.ux.SampleConfigs", {
           formatter : function () {
             return '<b>' + this.point.name + '</b>' + ',temperature is : ' + this.y;
           }
-
         },
         legend : {
           layout : 'vertical',
@@ -232,7 +231,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
           zoomType : 'x'
         },
         title : {
-          text : 'HighChart Example For ExtJs 4',
+          text : 'Highcharts (' + Highcharts.version + ') Example For ExtJs ' + Ext.versions.core.version,
           x : -20 //center
         },
         subtitle : {
@@ -314,7 +313,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
           marginBottom : 120
         },
         title : {
-          text : 'HighChart Donut Pie for ExtJs 4',
+          text : 'Highcharts (' + Highcharts.version + ') Donut Pie for ExtJs ' + Ext.versions.core.version,
           x : -20 //center
         },
         subtitle : {

@@ -41,6 +41,7 @@ Ext.define('HighCharts.controller.Charts', {
           // Create the store if not exists
           var configs = Ext.create('Chart.ux.SampleConfigs');
           var hcConfg = null;
+          var reloadDisabled = false;
           if(store) {
             store.destroy();
           }
@@ -66,6 +67,7 @@ Ext.define('HighCharts.controller.Charts', {
             case 'donut (pie)':
             case 'donut':
               hcConfig = configs.getDonut();
+              reloadDisabled = true;
               store = Ext.create('HighCharts.store.Browsers');
               break;
           }
@@ -78,7 +80,7 @@ Ext.define('HighCharts.controller.Charts', {
           store.load();
 
           // Enable all the chart relate buttons
-          Ext.getCmp('reload').setDisabled(false);
+          Ext.getCmp('reload').setDisabled(reloadDisabled);
         }
 
       }
