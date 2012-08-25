@@ -28,10 +28,15 @@ Ext.application({
       border : '5 5 5 5',
       items : [{
         region : 'north',
-        html : '<h1 class="x-panel-header">HighChart examples</h1>',
-        autoHeight : true,
+        html : '<h1 class="x-panel-header">Highcharts examples</h1>',
+        height: 40,
+        id: 'banner',
         border : false,
-        margins : '0 0 5 0'
+        margins : '0 0 5 0',
+        bodyStyle: { 'background-image': 'url(./images/banner.gif)',
+                     'background-repeat': 'repeat-x',
+                      color: '#7a7a7a'
+                   }
       }, {
         region : 'west',
         width : 150,
