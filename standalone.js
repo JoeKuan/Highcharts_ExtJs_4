@@ -77,7 +77,7 @@ Ext.application({
             }
           },
           title : {
-            text : 'HighChart for ExtJS 4',
+            text : 'HighChart (' + Highcharts.version + ') for ExtJS ' + Ext.versions.core.version,
             x : -20 //center
           },
           subtitle : {
