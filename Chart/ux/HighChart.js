@@ -271,8 +271,11 @@ Ext.define("Chart.ux.HighChart", {
       }
       if(this.chart)
         this.chart.xAxis[0].setCategories(data, true);
-      else
+      else if (Ext.isArray(this.chartConfig.xAxis)) {
         this.chartConfig.xAxis[0].categories = data;
+      } else {
+        this.chartConfig.xAxis.categories = data;
+      } 
     }
   },
 
