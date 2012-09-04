@@ -108,7 +108,7 @@ Ext.define("Chart.ux.HighChart", {
       for(var i = 0; i < c.length; i++) {
         this.chart.addSeries(c[i], true);
       }
-      //this.refresh();
+      this.refresh();
 
       // Set the data in the config.
     } else {
@@ -230,6 +230,8 @@ Ext.define("Chart.ux.HighChart", {
           this.series[i].visible = this.chart.series[i].visible;
         }
 
+        // Redraw the highchart means recreate the highchart
+        // inside this component
         // Destroy
         this.chart.destroy();
         delete this.chart;
@@ -244,6 +246,7 @@ Ext.define("Chart.ux.HighChart", {
        */
     } else if(this.rendered) {
       // Create the chart
+
       this.chart = new Highcharts.Chart(this.chartConfig);
     }
 
@@ -377,8 +380,11 @@ Ext.define("Chart.ux.HighChart", {
           if(serie.type == 'pie' && serie.totalDataField) {
             serie.getData(record, data[i]);
           } else {
-            if(serie.data && serie.data[x]) {
-              data[i].push(serie.data[x]);
+            if(serie.data && serie.data.length) {
+              if (serie.data[x] !== undefined)
+                  data[i].push(serie.data[x]);
+              else
+                  data[i].push(null);
             } else {
               point = serie.getData(record, x);
               data[i].push(point);
@@ -398,7 +404,8 @@ Ext.define("Chart.ux.HighChart", {
       }
 
       if(this.xField) {
-        this.updatexAxisData();
+        //this.updatexAxisData();
+        this.chart.xAxis[0].setCategories(xFieldData, true);
       }
     }
   },
@@ -583,12 +590,12 @@ Ext.define('Chart.ux.HighChart.Serie', {
   clear : Ext.emptyFn,
 
   getData : function(record, index) {
-    var yField = this.yField || this.dataIndex, xField = this.xField, point = {
+    var yField = this.yField || this.dataIndex, point = {
       data : record.data,
       y : record.data[yField]
     };
-    if(xField)
-      point.x = record.data[xField];
+    this.xField && (point.x = record.data[this.xField]);
+    this.colorField && (point.color = record.data[this.colorField]);
     return point;
   },
 
@@ -776,14 +783,25 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
     if(this.totalDataField) {
       var found = null;
       for(var i = 0; i < seriesData.length; i++) {
-        if(seriesData[i][0] == record.data[this.categorieField]) {
+        if(seriesData[i].name == record.data[this.categorieField]) {
           found = i;
-          seriesData[i][1] += record.data[this.dataField];
+          seriesData[i].y += record.data[this.dataField];
           break;
         }
       }
       if(found === null) {
-        seriesData.push([record.data[this.categorieField], record.data[this.dataField]]);
+        if (this.colorField && record.data[this.colorField]) {
+            seriesData.push({ 
+                name: record.data[this.categorieField], 
+                y: record.data[this.dataField],
+                color: record.data[this.colorField]
+            });
+        } else {
+            seriesData.push({ 
+                name: record.data[this.categorieField], 
+                y: record.data[this.dataField] 
+            });
+        }
         i = seriesData.length - 1;
       }
       return seriesData[i];
@@ -793,7 +811,19 @@ Ext.define('Chart.ux.HighChart.PieSerie', {
       this.addData(record);
       return [];
     }
-    return [record.data[this.categorieField], record.data[this.dataField]];
+
+    if (this.colorField && record.data[this.colorField]) {
+        return { 
+           name: record.data[this.categorieField], 
+           y: record.data[this.dataField],
+           color: record.data[this.colorField]
+        };
+    } else {
+        return { 
+           name: record.data[this.categorieField], 
+           y: record.data[this.dataField] 
+        };
+    }
   },
 
   getTotals : function() {
