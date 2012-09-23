@@ -1,0 +1,8 @@
+ver 2.0
+- Added support to Highcharts 2.3 gauge chart
+- Added support to Highcharts 2.3 range type charts: minDataIndex, maxDataIndex and dataIndex array mode
+- [ Optimisation ] reduce redundant call on refresh, draw method only call refresh if the store is not loading, i.e isLoading
+- [ Optimisation ] added refreshOnChange config - avoid redundant call on refresh.
+- [ Optimisation ] added pointObject as default false to create data as array instead of point object
+- Added ignoreInitAnim and initAnimAfterLoad to support initial animation
+- Added afterChartRender callback

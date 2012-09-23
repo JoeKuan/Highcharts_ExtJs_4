@@ -2,6 +2,7 @@ Ext.Loader.setConfig({
   enabled : true,
   disableCaching : true, // For debug only
   paths : {
+    // 'Chart' : HOME + '/highcharts_extjs4'     // For website
     'Chart' : 'Chart'
   }
 });
@@ -16,18 +17,35 @@ Ext.override(Ext.data.proxy.Ajax,{
     } 
 });
 
+Ext.ns("Demo");
+
 Ext.application({
   name : 'HighCharts',
+  // appFolder : HOME + '/demos/Highcharts_ExtJs_4/app',   // For website
   appFolder : 'app',
   controllers : ['Charts'],
 
   launch : function() {
+
+    // For joekuan.org website
+    if (Ext.get('loading-mask')) 
+        Ext.get('loading-mask').fadeOut({remove:true});
 
     Ext.create('Ext.container.Viewport', {
       layout : 'border',
       border : '5 5 5 5',
       items : [{
         region : 'north',
+        listeners: {
+           'render': function(panel) {
+               panel.body.on('click', function() {
+                   Ext.Msg.alert('Info', 
+                      'ExtJs version: ' + Ext.versions.core.version + ", <br/>" + 
+                      'Highcharts version: ' + Highcharts.version + ", <br/>" + 
+                      'Chart.ux.Highchart: ' + Chart.ux.HighChart.version);
+               });
+            }
+        },
         html : '<h1 class="x-panel-header">Highcharts examples</h1>',
         height: 40,
         id: 'banner',
@@ -39,11 +57,12 @@ Ext.application({
                    }
       }, {
         region : 'west',
-        width : 150,
+        width : 200,
         title : 'Charts',
         id: 'leftTree',
         xtype : 'chartsTree',
-        margins : '0 5 5 5'
+        margins : '0 5 5 5',
+        split: true
       }, {
         region : 'center',
         id : 'centerpane',

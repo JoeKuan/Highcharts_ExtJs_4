@@ -1,8 +1,8 @@
 /**
  * @author Joe Kuan (improved & ported from ExtJs 3 highchart adapter)
  * @email kuan.joe@gmail.com
- * @version 1.1
- * @date 8 May 2012
+ * @version 2.0
+ * @date 18 Sept 2012
  *
  * You are not permitted to remove the author section from this file.
  */
@@ -29,6 +29,16 @@ Ext.define("Chart.ux.HighChart", {
   extend : 'Ext.Component',
   alias : ['widget.highchart'],
 
+  debug: true,
+
+  debugOn : function() {
+      this.debug = true;
+  },
+
+  log: function(msg) {
+      (typeof console !== 'undefined' && this.debug) && console.log(msg);
+  },
+ 
   /**
    * @cfg {Object} defaultSerieType
    * Sets styles for this chart. This contains default styling, so modifying this
@@ -57,16 +67,84 @@ Ext.define("Chart.ux.HighChart", {
    */
   loadMask : false,
 
+  /**
+   * @cfg {Boolean} refreshOnChange 
+   * chart refresh data when store datachanged event is triggered,
+   * i.e. records are added, removed, or updated.
+   * If your application is just purely showing data from store load, 
+   * then you don't need this, make sure refreshOnLoad is true.
+   * (default: false)
+   */
+  refreshOnChange: false,
+
+  refreshOnLoad: true,
+
+  /**
+   * @cfg {Boolean}
+   * this config enable or disable chart init animation even Highcharts 
+   * chart.animation is true. If set to true, then the extension will
+   * try to build chart configuration with store series data.
+   * The initial animation is only on display:
+   *    1. store data is already loaded
+   *    2. chart.animation is not manually set to false
+   * (default: false) 
+   */
+  animation: true,
+  initAnim: true,
+  updateAnim: true,
+
+  /** 
+   * The line shift is achieved by comparing the existing x values in the chart
+   * and x values from the store record and work out the extra record.
+   * Then append the new records with shift. Hence, any old records with updated
+   * y values are ignored
+   * updateAnim: true
+   */
+  lineShift: false,
+
+  /**
+   * @cfg {Boolean}
+   * This option will defer initially chart create until the store is loaded
+   * This option must be used with initAnim: true
+   * (default: true)
+   */
+  initAnimAfterLoad: true,
+
+  /**
+   * @cfg {Function} afterChartRendered - callback for after the Highcharts
+   * is rendered. 
+   * afterChartRendered: function (Highcharts chart) 
+   */
+  afterChartRendered: null,
+
   // Create getter and setter function
   config : {
     title : '',
     subTitle : ''
   },
 
+  constructor: function(config) {
+    config.listeners && (this.afterChartRendered = config.listeners.afterChartRendered);
+    this.afterChartRendered && (this.afterChartRendered = Ext.bind(this.afterChartRendered, this));
+    if (config.animation == false) {
+        this.animation = false;
+        this.initAnim = false;
+        this.updateAnim = false; 
+        this.initAnimAfterLoad = false;
+    }
+    this.callParent(arguments);
+  },
+
   initComponent : function() {
     if(this.store) {
       this.store = Ext.data.StoreManager.lookup(this.store);
     }
+    if (this.animation == false) {
+        this.initAnim = false;
+        this.updateAnim = false; 
+        this.initAnimAfterLoad = false;
+    }
+
     this.callParent(arguments);
   },
 
@@ -213,17 +291,169 @@ Ext.define("Chart.ux.HighChart", {
 
     this.initEvents();
     // Make a delayed call to update the chart.
-    this.update(500);
+    this.update(0);
   },
 
   onMove : function() {
 
   },
 
+  /***
+   *  Build the initial data set if there are data already
+   *  inside the store.
+   */
+  buildInitData : function() {
+     if (!this.store || this.store.isLoading() || !this.chartConfig || this.initAnim === false ||
+         this.chartConfig.chart.animation === false) {
+         return;
+     }
+
+     var data = new Array(), seriesCount = this.series.length, i;
+
+     var items = this.store.data.items;
+     for( i = 0; i < seriesCount; i++) {
+
+         this.chartConfig.series[i].data = [];
+
+         // Sort out the type for this series
+         var seriesType = this.series[i].type || this.chartConfig.chart.defaultSeriesType;
+         var data = this.chartConfig.series[i].data = this.chartConfig.series[i].data || {};
+
+         // Check any series type we don't support here
+         if (!seriesType) {
+             continue;
+         }
+
+         switch(seriesType) {
+             case 'line':
+             case 'spline':
+             case 'area':
+             case 'areaspline':
+             case 'scatter':
+             case 'bar':
+             case 'column':
+                 var yField = this.series[i].yField || this.series[i].dataIndex;
+                 
+                 // Check whether series itself has its own xField defined,
+                 // If so, then expect this is a numeric field.
+                 if (this.series[i].xField) {
+                    var xField = this.series[i].xField;
+                    for (var x = 0; x < items.length; x++) {
+                        var record = items[x];
+                        data.push([ record.data[xField], record.data[yField] ]);
+                    } 
+        
+                 // This make sure the series has no manual data, rely on store record
+                 } else if (this.series[i].yField || this.series[i].dataIndex) {
+                    for (var x = 0; x < items.length; x++) {
+                        var record = items[x];
+                        data.push(record.data[yField]);
+                    }
+        
+                    var xAxis = (Ext.isArray(this.chartConfig.xAxis)) ? this.chartConfig.xAxis[0] : this.chartConfig.xAxis;
+                    // Build the first x-axis categories
+                    if (this.xField && (!xAxis.categories || xAxis.categories.length < items.length)) {
+                        xAxis.categories = xAxis.categories || [];
+                        for (var x = 0; x < items.length; x++) {
+                             xAxis.categories.push(items[x].data[this.xField]);
+                        }
+                    }
+                }
+                break;
+             case 'pie':
+                  // Summed up the category among the series data
+                  var categorieField = this.series[i].categorieField;
+                  var dataField = this.series[i].dataField;
+                  var colorField = this.series[i].colorField;
+
+                  if(this.series[i].totalDataField) {
+                    var found = null;
+                    var totData = {};
+                    for (var x = 0; x < items.length; x++) {
+                      var record = items[x];
+                      var categoryName = record.data[categorieField];
+                      // See whether this category name is already define in totData
+                      totData[categoryName] = totData[categoryName] || { total: 0 };
+                      totData[categoryName].total += record.data[dataField];
+                      colorField && (totData[categoryName].color = record.data[colorField]);
+                    }
+
+                    for (var y in totData) {
+                      var ptObject = { 
+                          name: y,
+                          y: totData[y].total
+                      };
+                      totData[y].color && (ptObject.color = totData[y].color);
+                      data.push(ptObject);
+                    }
+                } else {
+                    for (var x = 0; x < items.length; x++) {
+                      var record = items[x];
+                      var ptObject = { 
+                          name: record.data[categorieField],
+                          y: record.data[dataField]
+                      };
+                      colorField && (ptObject.color = record.data[colorField]);
+                      data.push(ptObject);
+                    }
+                }
+                break;
+             case 'columnrange':
+             case 'arearange':
+             case 'areasplinerange':
+                var xField = this.series[i].xField;
+                if (Ext.isArray(this.series[i].dataIndex)) {
+                    var f1 = this.series[i].dataIndex[0],
+                        f2 = this.series[i].dataIndex[1];
+
+                    for (var x = 0; x < items.length; x++) {
+                        var record = items[x];
+                        var y1 = record.data[f1], y2 = record.data[f2];
+                        if (xField) {
+                           if (y1 > y2)
+                              data.push([ record.data[xField], y2, y1 ]);
+                           else
+                              data.push([ record.data[xField], y1, y2 ]);
+                        } else {
+                           if (y1 > y2)
+                              data.push([ y2, y1 ]);
+                           else
+                              data.push([ y1, y2 ]);
+                        }
+                    }
+                } else if (this.series[i].minDataIndex && this.series[i].maxDataIndex) {
+                    var f1 = this.series[i].minDataIndex, 
+                        f2 = this.series[i].maxDataIndex;
+
+                    for (var x = 0; x < items.length; x++) {
+                        var record = items[x];
+                        var y1 = record.data[f1], y2 = record.data[f2];
+                        if (xField) {
+                           data.push([ record.data[xField], y1, y2 ]);
+                        } else {
+                           data.push([ y1, y2 ]);
+                        }
+                    }
+                }
+                var xAxis = (Ext.isArray(this.chartConfig.xAxis)) ? this.chartConfig.xAxis[0] : this.chartConfig.xAxis;
+                // Build the first x-axis categories
+                if (this.xField && !xField && (!xAxis.categories || xAxis.categories.length < items.length)) {
+                    xAxis.categories = xAxis.categories || [];
+                    for (var x = 0; x < items.length; x++) {
+                         xAxis.categories.push(items[x].data[this.xField]);
+                    }
+                } 
+                break;
+         }
+
+     }
+  },
+
   draw : function() {
     /**
      * Redraw the chart
      */
+    this.log("call draw");
     if(this.chart && this.rendered) {
       if(this.resizable) {
         for(var i = 0; i < this.series.length; i++) {
@@ -236,18 +466,26 @@ Ext.define("Chart.ux.HighChart", {
         this.chart.destroy();
         delete this.chart;
 
-        // Create a new chart
-        this.chart = new Highcharts.Chart(this.chartConfig);
+        this.buildInitData();
 
+        // Create a new chart
+        this.chart = new Highcharts.Chart(this.chartConfig, this.afterChartRendered);
       }
 
       /**
        * Create the chart
        */
     } else if(this.rendered) {
-      // Create the chart
+      // Create the chart from fresh
 
-      this.chart = new Highcharts.Chart(this.chartConfig);
+      if (!this.initAnimAfterLoad) {
+          this.buildInitData();
+          this.chart = new Highcharts.Chart(this.chartConfig, this.afterChartRendered);
+          this.log("initAnimAfterLoad is off, creating chart from fresh");
+      } else {
+          this.log("initAnimAfterLoad is on, defer creating chart");
+          return;
+      }
     }
 
     for( i = 0; i < this.series.length; i++) {
@@ -255,8 +493,12 @@ Ext.define("Chart.ux.HighChart", {
         this.chart.series[i].hide();
     }
 
-    // Refresh the data
-    this.refresh();
+    // Refresh the data only if it is not loading
+    // no point doing this, as onLoad will pick it up
+    if (!this.store.isLoading()) {
+        this.log("Call refresh from draw"); 
+        this.refresh();
+    }
   },
 
   //@deprecated
@@ -352,12 +594,13 @@ Ext.define("Chart.ux.HighChart", {
    * Complete refresh of the chart
    */
   refresh : function() {
+    this.log("Call refresh ");
     if(this.store && this.chart) {
 
       var data = new Array(), seriesCount = this.series.length, i;
 
       for( i = 0; i < seriesCount; i++)
-      data.push(new Array());
+          data.push(new Array());
 
       // We only want to go true the data once.
       // So we need to have all columns that we use in line.
@@ -367,9 +610,11 @@ Ext.define("Chart.ux.HighChart", {
 
       for(var x = 0; x < items.length; x++) {
         var record = items[x];
+
         if(this.xField) {
           xFieldData.push(record.data[this.xField]);
         }
+
         for( i = 0; i < seriesCount; i++) {
           var serie = this.series[i], point;
           if(serie.type == 'pie' && serie.useTotals) {
@@ -380,7 +625,11 @@ Ext.define("Chart.ux.HighChart", {
           if(serie.type == 'pie' && serie.totalDataField) {
             serie.getData(record, data[i]);
           } else {
-            if(serie.data && serie.data.length) {
+            // Gauge is a dial type chart, so the data can only
+            // have one value
+            if (serie.type =='gauge') {
+                data[i][0] = serie.getData(record, x); 
+            } else if(serie.data && serie.data.length) {
               if (serie.data[x] !== undefined)
                   data[i].push(serie.data[x]);
               else
@@ -389,23 +638,115 @@ Ext.define("Chart.ux.HighChart", {
               point = serie.getData(record, x);
               data[i].push(point);
             }
+            console.log(data[i][x]);
           }
         }
       }
 
       // Update the series
-      for( i = 0; i < seriesCount; i++) {
-        if(this.series[i].useTotals) {
-          this.chart.series[i].setData(this.series[i].getTotals());
-        } else if(data[i].length > 0) {
-          this.chart.series[i].setData(data[i], (i == (seriesCount - 1)));
-          // true == redraw.
-        }
-      }
+      if (!this.updateAnim) {
+          for( i = 0; i < seriesCount; i++) {
+            if(this.series[i].useTotals) {
+              this.chart.series[i].setData(this.series[i].getTotals());
+            } else if(data[i].length > 0) {
+              this.chart.series[i].setData(data[i], i == (seriesCount - 1));
+              // true == redraw.
+            }
+          }
+    
+          if(this.xField) {
+            //this.updatexAxisData();
+            this.chart.xAxis[0].setCategories(xFieldData, true);
+          }
+      } else {
+          for( i = 0; i < seriesCount; i++) {
+            if (this.series[i].useTotals) {
+               this.chart.series[i].setData(this.series[i].getTotals());
+            } else if (data[i].length > 0) {
+               if (!this.lineShift) {
+                   // Need to work out the length between the store dataset and
+                   // the current series data set
+                   var chartSeriesLength = this.chart.series[i].points.length;
+                   var storeSeriesLength = items.length;
+                   for (var x = 0; x < Math.min(chartSeriesLength, storeSeriesLength); x++) {
+                       this.chart.series[i].points[x].update(data[i][x], false, true);
+                   }
+                   // Append the rest of the points from store to chart
+                   if (storeSeriesLength > chartSeriesLength) {
+                      for (var y = 0; y < (storeSeriesLength - chartSeriesLength); y++, x++) {
+                          this.chart.series[i].addPoint(data[i][x], false, false, true);
+                      }
+                   }
+                   // Remove the excessive points from the chart
+                   else if (chartSeriesLength > storeSeriesLength) {
+                      for (var y = 0; y < (chartSeriesLength - storeSeriesLength); y++) {
+                          var last = this.chart.series[i].points.length - 1;
+                          this.chart.series[i].points[last].remove(false, true);
+                      }
+                   }
+               } else {
+                   var xAxis = Ext.isArray(this.chart.xAxis) ? this.chart.xAxis[0] : this.chart.xAxis;
+                   // We need to see whether compare through xAxis categories or data points x axis value
+                   var startIdx = -1;
 
-      if(this.xField) {
-        //this.updatexAxisData();
-        this.chart.xAxis[0].setCategories(xFieldData, true);
+                   if (xAxis.categories) {
+                      for (var x = 0 ; x < xFieldData.length; x++) {
+                          var found = false;
+                          for (var y = 0; y < xAxis.categories.length; y++) {
+                              if (xFieldData[x] == xAxis.categories[y]) {
+                                 found = true
+                                 break;
+                              }
+                          }
+                          if (!found) {
+                             startIdx = x;
+                             break;
+                          } 
+                      }
+                      this.log("startIdx " + startIdx);
+                      // Start shifting
+                      if (startIdx !== -1 && startIdx < xFieldData.length) {
+                         for (var x = startIdx; x < xFieldData.length; x++) {
+                             // Possible bug - category not update probably
+                             this.chart.series[i].addPoint({ y: data[i][x],
+                                                             category: xFieldData[x] }, false, true, true);
+                         }
+                      }
+                   } else { 
+                      var chartSeries = this.chart.series[i].points;
+                      for (var x = 0 ; x < data[i].length; x++) {
+                          var found = false;
+                          for (var y = 0; y < chartSeries.length; y++) {
+                              if (data[i][x][0] == chartSeries[y].x) {
+                                 found = true
+                                 break;
+                              }
+                          }
+                          if (!found) {
+                             startIdx = x;
+                             break;
+                          } 
+                      }
+                      this.log("startIdx " + startIdx);
+                      // Start shifting
+                      if (startIdx !== -1 && startIdx < data[i].length) {
+                         for (var x = startIdx; x < data[i].length; x++) {
+                             // Possible bug - category not update probably
+                             this.chart.series[i].addPoint(data[i][x], false, true, true);
+                         }
+                      }
+
+                   }
+               }
+            }
+          }
+
+          if(this.xField) {
+            //this.updatexAxisData();
+            this.chart.xAxis[0].setCategories(xFieldData, true);
+          }
+
+          this.chart.redraw();
       }
     }
   },
@@ -446,21 +787,24 @@ Ext.define("Chart.ux.HighChart", {
 
   // private
   onDataChange : function() {
-    this.refresh();
+    this.refreshOnChange && (this.refresh() && this.log("onDataChange"));
   },
 
   // private
   onClear : function() {
+console.log('onClear');
     this.refresh();
   },
 
   // private
   onUpdate : function(ds, record) {
+console.log('onUpdate');
     this.refreshRow(record);
   },
 
   // private
   onAdd : function(ds, records, index) {
+console.log('onAdd');
     var redraw = false, xFieldData = [];
 
     for(var i = 0; i < records.length; i++) {
@@ -513,7 +857,15 @@ Ext.define("Chart.ux.HighChart", {
 
   // private
   onLoad : function() {
-    this.refresh();
+    if (!this.chart && this.initAnimAfterLoad) {
+     this.log("Call refresh from onLoad for initAnim");
+        this.buildInitData();
+        this.chart = new Highcharts.Chart(this.chartConfig, this.afterChartRendered);
+        return;
+    } 
+
+    this.log("Call refresh from onLoad");
+    this.refreshOnLoad && this.refresh();
   },
 
   destroy : function() {
@@ -562,6 +914,16 @@ Ext.define('Chart.ux.HighChart.Serie', {
   type : null,
 
   /**
+   * The default action for series point data is to use array instead of point object
+   * unless desired to set point particular field. This changes the default behaviour
+   * of getData template method
+   * Default: false
+   * 
+   * @type Boolean
+   */
+  pointObject: false,
+
+  /**
    * The field used to access the x-axis value from the items from the data
    * source.
    *
@@ -589,7 +951,7 @@ Ext.define('Chart.ux.HighChart.Serie', {
 
   clear : Ext.emptyFn,
 
-  getData : function(record, index) {
+  obj_getData : function(record, index) {
     var yField = this.yField || this.dataIndex, point = {
       data : record.data,
       y : record.data[yField]
@@ -597,6 +959,14 @@ Ext.define('Chart.ux.HighChart.Serie', {
     this.xField && (point.x = record.data[this.xField]);
     this.colorField && (point.color = record.data[this.colorField]);
     return point;
+  },
+
+  arr_getDataSingle: function(record, index) {
+    return record.data[this.yField];
+  },
+
+  arr_getDataPair: function(record, index) {
+    return [ record.data[ this.xField ], record.data[ this.yField ] ];
   },
 
   serieCls : true,
@@ -608,9 +978,61 @@ Ext.define('Chart.ux.HighChart.Serie', {
     }
     Ext.apply(this, config);
     this.config = config;
+
+    this.yField = this.yField || this.dataIndex;
+
+    // If getData method is already defined, then overwrite it
+    if (!this.getData) {
+       if (this.pointObject) {
+         this.getData = this.obj_getData;
+       } else if (this.xField) {
+         this.getData = this.arr_getDataPair;
+       } else {
+         this.getData = this.arr_getDataSingle;
+       }
+    }
   }
 
 });
+
+/**
+ * @class Chart.ux.HighChart.RangeSerie
+ * @extends Chart.ux.HighChart.Serie
+ * RangeSerie class for the range charts widget.
+ * @constructor
+ */
+Ext.define('Chart.ux.HighChart.RangeSerie', {
+  extend : 'Chart.ux.HighChart.Serie',
+
+  minDataIndex: null,
+  maxDataIndex: null,
+  needSorting: null,
+
+  constructor: function(config) {
+      if (Ext.isArray(config.dataIndex)) {
+          this.field1 = config.dataIndex[0];
+          this.field2 = config.dataIndex[1];
+          this.needSorting = true;
+      } else if (config.minDataIndex && config.maxDataIndex) {
+          this.minDataIndex = config.minDataIndex;
+          this.maxDataIndex = config.maxDataIndex;
+          this.needSorting = false;
+      }
+      this.callParent(arguments);
+  },
+
+  getData: function(record, index) {
+     if (this.needSorting === true) {
+         return (record.data[this.field1] > record.data[this.field2]) ? [ record.data[this.field2], record.data[this.field1] ] : [ record.data[this.field1], record.data[this.field2] ];
+     } 
+
+     if (record.data[this.minDataIndex] !== undefined && record.data[this.maxDataIndex] !== undefined) {
+         return ([record.data[this.minDataIndex], record.data[this.maxDataIndex]]);
+     }
+  }
+});
+
+Chart.ux.HighChart.version = '2.0';
 
 /**
  * @class Chart.ux.HighChart.SplineSerie
@@ -683,6 +1105,54 @@ Ext.define('Chart.ux.HighChart.AreaSplineSerie', {
   type : 'areaspline'
 });
 Chart.ux.HighChart.Series.reg('areaspline', 'Chart.ux.HighChart.AreaSplineSerie');
+
+/**
+ * @class Chart.ux.HighChart.GaugeSerie
+ * @extends Chart.ux.HighChart.Serie
+ * GaugeSerie class for the charts widget.
+ * @constructor
+ */
+Ext.define('Chart.ux.HighChart.GaugeSerie', {
+  extend : 'Chart.ux.HighChart.Serie',
+  type : 'gauge'
+});
+Chart.ux.HighChart.Series.reg('gauge', 'Chart.ux.HighChart.GaugeSerie');
+
+/**
+ * @class Chart.ux.HighChart.AreaRangeSerie
+ * @extends Chart.ux.HighChart.Serie
+ * AreaRangeSerie class for the charts widget.
+ * @constructor
+ */
+Ext.define('Chart.ux.HighChart.AreaRangeSerie', {
+  extend : 'Chart.ux.HighChart.RangeSerie',
+  type : 'arearange'
+});
+Chart.ux.HighChart.Series.reg('arearange', 'Chart.ux.HighChart.AreaRangeSerie');
+
+/**
+ * @class Chart.ux.HighChart.AreaSplineRangeSerie
+ * @extends Chart.ux.HighChart.Serie
+ * AreaSplineRangeSerie class for the charts widget.
+ * @constructor
+ */
+Ext.define('Chart.ux.HighChart.AreaSplineRangeSerie', {
+  extend : 'Chart.ux.HighChart.RangeSerie',
+  type : 'areasplinerange'
+});
+Chart.ux.HighChart.Series.reg('areasplinerange', 'Chart.ux.HighChart.AreaSplineRangeSerie');
+
+/**
+ * @class Chart.ux.HighChart.ColumnRangeSerie
+ * @extends Chart.ux.HighChart.Serie
+ * ColumnRangeSerie class for the charts widget.
+ * @constructor
+ */
+Ext.define('Chart.ux.HighChart.ColumnRangeSerie', {
+  extend : 'Chart.ux.HighChart.RangeSerie',
+  type : 'columnrange'
+});
+Chart.ux.HighChart.Series.reg('columnrange', 'Chart.ux.HighChart.ColumnRangeSerie');
 
 /**
  * @class Chart.ux.HighChart.ScatterSerie

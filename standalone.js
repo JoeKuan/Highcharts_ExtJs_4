@@ -2,7 +2,7 @@ Ext.Loader.setConfig({
   enabled : true,
   disableCaching : true, // For debug only
   paths : {
-    'Chart' : 'Chart'
+    'Chart' : './Chart/'
   }
 });
 
@@ -39,6 +39,29 @@ Ext.application({
       autoLoad : true
     });
 
+    var randomFromTo = function(from, to) {
+      return Math.floor(Math.random() * (to - from + 1) + from);
+    };
+
+    var seriesNum = 2;
+
+    var genSeries = function() {
+      var temps = [];
+      for(var i = 0; i < 20; i++) {
+        temps[i] = randomFromTo(15, 30);
+      }
+
+      var series = {
+        type : 'spline',
+        name : seriesNum + ' days ago',
+        data : temps
+      };
+      
+      seriesNum++;
+      
+      return series;
+    };
+
     var win = Ext.create('Ext.window.Window', {
       width : 800,
       height : 600,
@@ -50,9 +73,19 @@ Ext.application({
       title : 'Highchart example',
       renderTo : Ext.getBody(),
       layout : 'fit',
+      tbar : [{
+        xtype : 'button',
+        text : 'Add series',
+        handler : function() {
+          var chart = Ext.getCmp('chart');
+          chart.addSeries([ genSeries() ], true);
+        }
+
+      }],
       items : [{
         xtype : 'highchart',
         id : 'chart',
+        defaultSeriesType : 'spline',
         series : [{
           type : 'spline',
           dataIndex : 'yesterday',
@@ -77,15 +110,12 @@ Ext.application({
             }
           },
           title : {
-            text : 'HighChart (' + Highcharts.version + ') for ExtJS ' + Ext.versions.core.version,
+            text : 'Highcharts (' + Highcharts.version + ') Example For ExtJs ' + Ext.versions.core.version,
             x : -20 //center
           },
           subtitle : {
             text : 'Random value',
             x : -20
-          },
-          scrollbar: {
-            enabled: true
           },
           xAxis : [{
             title : {
@@ -103,6 +133,7 @@ Ext.application({
                   return this.value;
                 }
               }
+
             }
           }],
           yAxis : {
@@ -127,6 +158,7 @@ Ext.application({
             formatter : function() {
               return '<b>' + this.series.name + '</b><br/>' + this.x + ': ' + this.y;
             }
+
           },
           credits : {
             href : 'http://joekuan.wordpress.com',
@@ -145,4 +177,5 @@ Ext.application({
     });
     win.show();
   }
+
 });
