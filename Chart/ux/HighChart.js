@@ -29,7 +29,7 @@ Ext.define("Chart.ux.HighChart", {
   extend : 'Ext.Component',
   alias : ['widget.highchart'],
 
-  debug: true,
+  debug: false,
 
   debugOn : function() {
       this.debug = true;
@@ -638,7 +638,6 @@ Ext.define("Chart.ux.HighChart", {
               point = serie.getData(record, x);
               data[i].push(point);
             }
-            console.log(data[i][x]);
           }
         }
       }
@@ -792,19 +791,16 @@ Ext.define("Chart.ux.HighChart", {
 
   // private
   onClear : function() {
-console.log('onClear');
     this.refresh();
   },
 
   // private
   onUpdate : function(ds, record) {
-console.log('onUpdate');
     this.refreshRow(record);
   },
 
   // private
   onAdd : function(ds, records, index) {
-console.log('onAdd');
     var redraw = false, xFieldData = [];
 
     for(var i = 0; i < records.length; i++) {
