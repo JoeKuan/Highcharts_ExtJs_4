@@ -40,9 +40,11 @@ Ext.define('HighCharts.controller.Charts', {
           var configs = Ext.create('Chart.ux.SampleConfigs');
           var hcConfg = null;
           var reloadDisabled = false;
+          /*
           if(store) {
             store.destroy();
           }
+          */
           switch (selectedType) {
             case 'spline':
               hcConfig = configs.getSpline();
