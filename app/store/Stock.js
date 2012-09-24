@@ -4,7 +4,7 @@ Ext.define('HighCharts.store.Stock', {
   model: 'HighCharts.model.Stock',
   proxy : { 
     type: 'ajax',
-    url: './data/stock.php',
+    url: './data/stock.json',
     reader : {
       type: 'json',
       root: 'rows'

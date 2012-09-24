@@ -786,7 +786,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
             chart: {
             },
             title: {
-                text: 'Last 30 days stock price - Apple (AAPL)'
+                text: 'Stock price from 28th Aug 2012 to 20th Sept 2012 - Apple (AAPL)'
             },
             subtitle: {
                 text: 'High & Low range'
@@ -827,7 +827,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
             chart: {
             },
             title: {
-                text: 'Last 30 days stock price - Apple (AAPL)'
+                text: 'Stock price from 28th Aug 2012 to 20th Sept 2012 - Apple (AAPL)'
             },
             subtitle: {
                 text: 'Open & Close range'
@@ -940,7 +940,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
             chart: {
             },
             title: {
-                text: 'Last 30 days stock price - Apple (AAPL)'
+                text: 'Stock price from 28th Aug 2012 to 20th Sept 2012 - Apple (AAPL)'
             },
             subtitle: {
                 text: 'Open & Close and High & Low ranges'
