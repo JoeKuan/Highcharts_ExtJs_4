@@ -7,9 +7,20 @@
     }
   }
 
+  define("NULL_RATIO", 5);
+
   session_start();
-//unset($_SESSION['temperature']);
-  if (!isset($_SESSION['temperature'])) {
+  $generateAllData = false; 
+  // Check whether for the same demo
+  if ($_SESSION['demo'] == $_POST['demo']) {
+     if (!isset($_SESSION['temperature'])) {
+        $generateAllData = true;
+     } 
+  } else {
+     $generateAllData = true;
+  }
+
+  if ($generateAllData) {
     for ($i = 0; $i < 20; $i++) {
       $tm = 1327600670 + (3600 * $i);
       if ($_POST['numeric'] == 1) {
@@ -18,6 +29,19 @@
         $result['rows'][] = array( 'time' => '' + $tm * 1000, 'yesterday' => rand(20,30), 'today' => rand(15, 25));
       }
     }
+    // If random is supplied, then randomly set null to the temperature
+    if (intval($_POST['random']) == 1) {
+       for ($i = 0; $i < 20; $i++) {
+         // Make the data point null
+         if (rand(0, NULL_RATIO) == NULL_RATIO) {
+             $result['rows'][$i]['yesterday'] = null;
+         }
+         if (rand(0, NULL_RATIO) == NULL_RATIO) {
+             $result['rows'][$i]['today'] = null;
+         }
+       }
+    }
+     
     $_SESSION['temperature'] = $result;
   } else {
     $result = $_SESSION['temperature'];
@@ -28,8 +52,19 @@
       } else {
          $result['rows'][] = array( 'time' => '' + ($lastTime + 3600000), 'yesterday' => rand(20,30), 'today' => rand(15, 25));
       }
+    // If random is supplied, then randomly set null to the temperature
+    if (intval($_POST['random']) == 1) {
+         // Make 1/4 of the data point is null
+         if (rand(0, NULL_RATIO) == NULL_RATIO) {
+             $result['rows'][19]['yesterday'] = null;
+         }
+         if (rand(0, NULL_RATIO) == NULL_RATIO) {
+             $result['rows'][19]['today'] = null;
+         }
+    }
     $_SESSION['temperature'] = $result;
   }
+  $_SESSION['demo'] = $_POST['demo'];
 
   $result['success'] = true;
   

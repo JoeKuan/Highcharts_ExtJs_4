@@ -18,6 +18,21 @@ Ext.define('HighCharts.controller.Charts', {
         }
       },
 
+      '#addSeries[action=addSeries]' : {
+        click : function() {
+            var data = [];
+            var chart = Ext.getCmp('main_chart').chart;
+            for (var i = 0; i < 20; i++) {
+               data.push((Math.random() * 15) + 15); 
+            } 
+            Ext.getCmp('main_chart').addSeries([{
+               name: chart.series.length + ' days ago',
+               data: data,
+               type: 'spline',   
+            }], true);
+        }
+      },
+
       // Click on entry in the left tree
       'chartsTree' : {
         itemclick : function(view, model, item) {
@@ -45,6 +60,9 @@ Ext.define('HighCharts.controller.Charts', {
             store.destroy();
           }
           */
+          // Clear up special purpose widget
+          Ext.getCmp('addSeries').setDisabled(true);
+
           switch (selectedType) {
             case 'spline':
               hcConfig = configs.getSpline();
@@ -65,6 +83,16 @@ Ext.define('HighCharts.controller.Charts', {
               hcConfig = configs.getSplineNumShift();
               store = Ext.create('HighCharts.store.NumericTemperature');
               store.getProxy().setModel('HighCharts.model.NumericTemperature');
+              break;
+            case 'splineAddSeries': 
+              hcConfig = configs.getSplineAddSeries();
+              store = Ext.create('HighCharts.store.Temperature');
+              store.getProxy().setModel('HighCharts.model.Temperature');
+              break;
+            case 'splineNullData': 
+              hcConfig = configs.getSplineNullData();
+              store = Ext.create('HighCharts.store.NullTemperature');
+              store.getProxy().setModel('HighCharts.model.NullTemperature');
               break;
             case 'splinePopup':
               hcConfig = configs.getSplinePopup();
@@ -114,6 +142,7 @@ Ext.define('HighCharts.controller.Charts', {
               store = Ext.create('HighCharts.store.BrowsersJune');
               break;
           }
+          store.getProxy().extraParams.demo = selectedType;
 
           // New chart with config and id
           hcConfig.id = 'main_chart';

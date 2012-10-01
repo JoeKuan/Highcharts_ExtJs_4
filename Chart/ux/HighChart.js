@@ -1,8 +1,8 @@
 /**
- * @author Joe Kuan (improved & ported from ExtJs 3 highchart adapter)
+ * @author Joe Kuan (much improved & ported from ExtJs 3 highchart adapter)
  * @email kuan.joe@gmail.com
- * @version 2.0
- * @date 18 Sept 2012
+ * @version 2.1
+ * @date 28 Sept 2012
  *
  * You are not permitted to remove the author section from this file.
  */
@@ -617,27 +617,31 @@ Ext.define("Chart.ux.HighChart", {
 
         for( i = 0; i < seriesCount; i++) {
           var serie = this.series[i], point;
-          if(serie.type == 'pie' && serie.useTotals) {
-            if(x == 0)
-              serie.clear();
-            point = serie.getData(record, x);
-          }
-          if(serie.type == 'pie' && serie.totalDataField) {
-            serie.getData(record, data[i]);
-          } else {
-            // Gauge is a dial type chart, so the data can only
-            // have one value
-            if (serie.type =='gauge') {
-                data[i][0] = serie.getData(record, x); 
-            } else if(serie.data && serie.data.length) {
+          if (serie.dataIndex || serie.yField || serie.minDataIndex) {
+              point = serie.getData(record, x);
+              data[i].push(point);
+          } else if (serie.type == 'pie') {
+              if (serie.useTotals) {
+                  if(x == 0)
+                     serie.clear();
+                  point = serie.getData(record, x);
+              } else if (serie.totalDataField) {
+                  serie.getData(record, data[i]);
+              } else {
+                  point = serie.getData(record, x);
+                  data[i].push(point);
+              }
+          } else if (serie.type == 'gauge') {
+              // Gauge is a dial type chart, so the data can only
+              // have one value
+              data[i][0] = serie.getData(record, x); 
+          } else if (serie.data && serie.data.length) {
+              // This means the series is added within its own data
+              // not from the store
               if (serie.data[x] !== undefined)
                   data[i].push(serie.data[x]);
               else
                   data[i].push(null);
-            } else {
-              point = serie.getData(record, x);
-              data[i].push(point);
-            }
           }
         }
       }
@@ -658,6 +662,7 @@ Ext.define("Chart.ux.HighChart", {
             this.chart.xAxis[0].setCategories(xFieldData, true);
           }
       } else {
+          var xCatStartIdx = -1;
           for( i = 0; i < seriesCount; i++) {
             if (this.series[i].useTotals) {
                this.chart.series[i].setData(this.series[i].getTotals());
@@ -667,9 +672,11 @@ Ext.define("Chart.ux.HighChart", {
                    // the current series data set
                    var chartSeriesLength = this.chart.series[i].points.length;
                    var storeSeriesLength = items.length;
+                   console.log(this.chart.series[i].points);
                    for (var x = 0; x < Math.min(chartSeriesLength, storeSeriesLength); x++) {
-                       this.chart.series[i].points[x].update(data[i][x], false, true);
+                       this.chart.series[i].points[x].update({ y: data[i][x] }, false, true);
                    }
+                   console.log(data);
                    // Append the rest of the points from store to chart
                    if (storeSeriesLength > chartSeriesLength) {
                       for (var y = 0; y < (storeSeriesLength - chartSeriesLength); y++, x++) {
@@ -686,29 +693,40 @@ Ext.define("Chart.ux.HighChart", {
                } else {
                    var xAxis = Ext.isArray(this.chart.xAxis) ? this.chart.xAxis[0] : this.chart.xAxis;
                    // We need to see whether compare through xAxis categories or data points x axis value
-                   var startIdx = -1;
+                   var startIdx = -1; 
 
                    if (xAxis.categories) {
-                      for (var x = 0 ; x < xFieldData.length; x++) {
-                          var found = false;
-                          for (var y = 0; y < xAxis.categories.length; y++) {
-                              if (xFieldData[x] == xAxis.categories[y]) {
-                                 found = true
-                                 break;
+                      // Since this is categories, it means multiple series share the common
+                      // categories. Hence we only do it once to find the startIdx position
+                      if (i == 0) {
+                          for (var x = 0 ; x < xFieldData.length; x++) {
+                              var found = false;
+                              for (var y = 0; y < xAxis.categories.length; y++) {
+                                  if (xFieldData[x] == xAxis.categories[y]) {
+                                     found = true
+                                     break;
+                                  }
                               }
+                              if (!found) {
+                                 xCatStartIdx = startIdx = x;
+                                 break;
+                              } 
                           }
-                          if (!found) {
-                             startIdx = x;
-                             break;
-                          } 
+
+                          var categories = xAxis.categories.slice(0);
+                          categories.push(xFieldData[x]);
+                          xAxis.setCategories(categories, false);
+                      } else {
+                          // Reset the startIdx
+                          startIdx = xCatStartIdx;
                       }
                       this.log("startIdx " + startIdx);
                       // Start shifting
                       if (startIdx !== -1 && startIdx < xFieldData.length) {
                          for (var x = startIdx; x < xFieldData.length; x++) {
-                             // Possible bug - category not update probably
-                             this.chart.series[i].addPoint({ y: data[i][x],
-                                                             category: xFieldData[x] }, false, true, true);
+
+                             this.chart.series[i].addPoint(data[i][x],
+                                                           false, true, true);
                          }
                       }
                    } else { 
@@ -730,7 +748,6 @@ Ext.define("Chart.ux.HighChart", {
                       // Start shifting
                       if (startIdx !== -1 && startIdx < data[i].length) {
                          for (var x = startIdx; x < data[i].length; x++) {
-                             // Possible bug - category not update probably
                              this.chart.series[i].addPoint(data[i][x], false, true, true);
                          }
                       }
@@ -740,7 +757,8 @@ Ext.define("Chart.ux.HighChart", {
             }
           }
 
-          if(this.xField) {
+          // For Line Shift it has to be setCategories before addPoint
+          if(this.xField && !this.lineShift) {
             //this.updatexAxisData();
             this.chart.xAxis[0].setCategories(xFieldData, true);
           }

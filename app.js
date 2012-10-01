@@ -74,6 +74,11 @@ Ext.application({
           id : 'reload',
           disabled : true,
           action: 'reload'
+        }, {
+          text: 'Add Series',
+          id: 'addSeries',
+          disabled: true,
+          action: 'addSeries'
         }]
       }]
     });
