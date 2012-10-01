@@ -672,11 +672,9 @@ Ext.define("Chart.ux.HighChart", {
                    // the current series data set
                    var chartSeriesLength = this.chart.series[i].points.length;
                    var storeSeriesLength = items.length;
-                   console.log(this.chart.series[i].points);
                    for (var x = 0; x < Math.min(chartSeriesLength, storeSeriesLength); x++) {
                        this.chart.series[i].points[x].update({ y: data[i][x] }, false, true);
                    }
-                   console.log(data);
                    // Append the rest of the points from store to chart
                    if (storeSeriesLength > chartSeriesLength) {
                       for (var y = 0; y < (storeSeriesLength - chartSeriesLength); y++, x++) {
