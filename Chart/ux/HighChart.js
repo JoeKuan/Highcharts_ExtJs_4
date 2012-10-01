@@ -1049,7 +1049,7 @@ Ext.define('Chart.ux.HighChart.RangeSerie', {
   }
 });
 
-Chart.ux.HighChart.version = '2.0';
+Chart.ux.HighChart.version = '2.1';
 
 /**
  * @class Chart.ux.HighChart.SplineSerie
