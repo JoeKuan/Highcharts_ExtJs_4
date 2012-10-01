@@ -28,7 +28,7 @@ Ext.define('HighCharts.controller.Charts', {
             Ext.getCmp('main_chart').addSeries([{
                name: chart.series.length + ' days ago',
                data: data,
-               type: 'spline',   
+               type: 'spline'
             }], true);
         }
       },

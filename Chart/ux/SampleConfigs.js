@@ -519,11 +519,11 @@ Ext.define ("Chart.ux.SampleConfigs", {
       series : [{
         type : 'spline',
         dataIndex : 'yesterday',
-        name : 'Yesterday',
+        name : 'Yesterday'
       }, {
         type : 'spline',
         dataIndex : 'today',
-        name : 'Today',
+        name : 'Today'
       }],
       xField : 'time',
       height : 500,
@@ -614,11 +614,11 @@ Ext.define ("Chart.ux.SampleConfigs", {
       series : [{
         type : 'spline',
         dataIndex : 'yesterday',
-        name : 'Yesterday',
+        name : 'Yesterday'
       }, {
         type : 'spline',
         dataIndex : 'today',
-        name : 'Today',
+        name : 'Today'
       }],
       xField : 'time',
       height : 500,
