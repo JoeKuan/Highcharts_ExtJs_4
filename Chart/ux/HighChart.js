@@ -638,10 +638,11 @@ Ext.define("Chart.ux.HighChart", {
           } else if (serie.data && serie.data.length) {
               // This means the series is added within its own data
               // not from the store
-              if (serie.data[x] !== undefined)
+              if (serie.data[x] !== undefined) {
                   data[i].push(serie.data[x]);
-              else
+              } else {
                   data[i].push(null);
+              }
           }
         }
       }
@@ -673,7 +674,11 @@ Ext.define("Chart.ux.HighChart", {
                    var chartSeriesLength = this.chart.series[i].points.length;
                    var storeSeriesLength = items.length;
                    for (var x = 0; x < Math.min(chartSeriesLength, storeSeriesLength); x++) {
-                       this.chart.series[i].points[x].update({ y: data[i][x] }, false, true);
+                       if (Ext.isObject(data[i][x])) {
+                           this.chart.series[i].points[x].update(data[i][x], false, true);
+                       } else {
+                           this.chart.series[i].points[x].update({ y: data[i][x] }, false, true);
+                       }
                    }
                    // Append the rest of the points from store to chart
                    if (storeSeriesLength > chartSeriesLength) {
