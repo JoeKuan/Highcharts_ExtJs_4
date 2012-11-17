@@ -6,6 +6,7 @@ $result[] = array('text' => 'Spline - Line Shift (Numeric x-axis)', 'id' => 'cha
 $result[] = array('text' => 'Spline - ExtJs Popup Menu', 'id' => 'charts/splinePopup', 'leaf' => true, 'icon' => './images/linechart.png');
 $result[] = array('text' => 'Spline - Add Series (non store data)', 'id' => 'charts/splineAddSeries', 'leaf' => true, 'icon' => './images/linechart.png');
 $result[] = array('text' => 'Spline - Null data', 'id' => 'charts/splineNullData', 'leaf' => true, 'icon' => './images/linechart.png');
+$result[] = array('text' => 'Spline - afterChartRendered callback', 'id' => 'charts/splineAfterRenderedCallback', 'leaf' => true, 'icon' => './images/linechart.png');
 $result[] = array('text' => 'Column', 'id' => 'charts/column', 'leaf' => true, 'icon' => './images/columnchart.png');
 $result[] = array('text' => 'Pie', 'id' => 'charts/pie', 'leaf' => true, 'icon' => './images/piechart.png');
 $result[] = array('text' => 'Scatter', 'id' => 'charts/scatter', 'leaf' => true, 'icon' => './images/scatter.png');

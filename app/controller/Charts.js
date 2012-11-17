@@ -99,6 +99,11 @@ Ext.define('HighCharts.controller.Charts', {
               store = Ext.create('HighCharts.store.NumericTemperature');
               store.getProxy().setModel('HighCharts.model.NumericTemperature');
               break;
+            case 'splineAfterRenderedCallback':
+              hcConfig = configs.getSplineAfterRenderedCallback();
+              store = Ext.create('HighCharts.store.NumericTemperature');
+              store.getProxy().setModel('HighCharts.model.NumericTemperature');
+              break;
             case 'column':
               hcConfig = configs.getColumn();
               store = Ext.create('HighCharts.store.Temperature');

@@ -513,6 +513,99 @@ Ext.define ("Chart.ux.SampleConfigs", {
     },
 
     /*********************************************
+     *    Spline - afterChartRendered callback 
+     *********************************************/
+    splineAfterRenderedCallback : {
+      series : [{
+        type : 'spline',
+        dataIndex : 'yesterday',
+        name : 'Yesterday',
+        xField : 'time'
+      }, {
+        type : 'spline',
+        dataIndex : 'today',
+        name : 'Today',
+        xField : 'time'
+      }],
+      listeners: {
+        afterChartRendered: function(chart) {
+            var size = this.getSize();
+            var temp = 0;
+            Ext.each(chart.series[0].data, function(data) {
+                temp += data.y;
+            });
+            temp = temp / chart.series[0].data.length;
+
+            Ext.Msg.alert('Info', 'This message box is called after the chart is rendered. ' + 
+                          'Extension width:' + size.width + ', height: ' + size.height + '. ' +
+                          'Series (' + chart.series[0].name + ') Average: ' + temp);
+        }
+      },
+      height : 500,
+      width : 700,
+      chartConfig : {
+        chart : {
+          marginRight : 130,
+          marginBottom : 120,
+          zoomType : 'x'
+        },
+        title : {
+          text : 'A message box is displayed after the chart is rendered and shows the average value',
+          x : -20 //center
+        },
+        subtitle : {
+          text : 'Random Value',
+          x : -20
+        },
+        xAxis : [{
+          type: 'datetime',
+          title : {
+            text : 'Time',
+            margin : 20
+          },
+          labels : {
+            rotation : 270,
+            y : 35
+          }
+        }],
+        yAxis : {
+          title : {
+            text : 'Temperature'
+          },
+          plotLines : [{
+            value : 0,
+            width : 1,
+            color : '#808080'
+          }]
+        },
+        tooltip : {
+          formatter : function () {
+            var dt = Ext.Date.parse (parseInt (this.x) / 1000, "U");
+            return 'At <b>' + this.series.name + '</b>' + Ext.Date.format (dt, "H:i:s") + ',<br/>temperature is : ' + this.y;
+          }
+
+        },
+        legend : {
+          layout : 'vertical',
+          align : 'right',
+          verticalAlign : 'top',
+          x : -10,
+          y : 100,
+          borderWidth : 0
+        },
+        credits : {
+          text : 'joekuan.wordpress.com',
+          href : 'http://joekuan.wordpress.com',
+          style : {
+            cursor : 'pointer',
+            color : '#707070',
+            fontSize : '12px'
+          }
+        }
+      }
+    },
+
+    /*********************************************
      *    Spline - addSeries
      *********************************************/
     splineAddSeries : {
