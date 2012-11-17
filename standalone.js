@@ -26,7 +26,7 @@ Ext.application({
       }]
     });
 
-    var store = new Ext.create('Ext.data.Store', {
+    var store = Ext.create('Ext.data.Store', {
       model : 'HighChartData',
       proxy : {
         type : 'ajax',
