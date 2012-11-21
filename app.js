@@ -61,7 +61,7 @@ Ext.application({
         title : 'Charts',
         id: 'leftTree',
         xtype : 'chartsTree',
-        margins : '0 5 5 5',
+        margins : '0 0 5 5',
         split: true
       }, {
         region : 'center',
