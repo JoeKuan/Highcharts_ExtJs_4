@@ -1287,6 +1287,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
     gauge: {
       series : [{
         type : 'gauge',
+        color: dialColor,
         dataIndex : 'speed',
                 yAxis: 0,
                 dataLabels: {
@@ -1302,7 +1303,6 @@ Ext.define ("Chart.ux.SampleConfigs", {
                     }
                 },
                 dial: {
-                    backgroundColor: dialColor,
                     baseLength: '90%',
                     baseWidth: 7,
                     radius: '100%',
@@ -1317,6 +1317,7 @@ Ext.define ("Chart.ux.SampleConfigs", {
                 }
       }, {
         type : 'gauge',
+        color: dialColor,
         dataIndex : 'rpm',
                 yAxis: 2,
                 dataLabels: {
@@ -1334,7 +1335,6 @@ Ext.define ("Chart.ux.SampleConfigs", {
                     }
                 },
                 dial: {
-                    backgroundColor: dialColor,
                     baseLength: '90%',
                     baseWidth: 7,
                     radius: '100%',
