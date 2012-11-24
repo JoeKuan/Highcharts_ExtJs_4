@@ -1,3 +1,9 @@
+ver 2.1.1
+Demos
+- Fixed dial color in gauge chart demo
+- Corrected thickness in splitter bar
+- Typo in page title
+
 ver 2.1
 Highcharts extension 
 - Fixed shift animation on category data
